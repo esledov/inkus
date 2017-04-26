@@ -90,10 +90,6 @@ class MakoHandler(SimpleHTTPRequestHandler):
         fname = self.path[:-len(HTML_EXT)] + '.mako'
         self.log_message("rendering %s template", fname)
 
-        # for windows people
-        if os.path.sep != '/':
-            fname = fname.replace('/', os.path.sep)
-
         try:
 
             template = lookup.get_template(fname)
