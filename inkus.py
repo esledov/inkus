@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 import os.path
 from mako.lookup import TemplateLookup
 from mako import exceptions
@@ -29,10 +30,6 @@ try:
     imports.append('import mysite')
 except ImportError:
     print('Please create module mysite.py to keep global vars!')
-
-# when a file with this extension is requested,
-# mako file will be rendered and served instead
-HTML_EXT = '.htm' # or '.html'
 
 lookup = TemplateLookup(
             directories=['.'],
@@ -65,6 +62,8 @@ class MakoHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         """Serve a GET request."""
 
+        serve_index_mako = self.serve_index_mako()
+
         # shutdown the server by visiting /killme page
         # Ctrl-C from the same thread does not work so good
         if self.path.startswith('/killme'):
@@ -80,20 +79,28 @@ class MakoHandler(SimpleHTTPRequestHandler):
 
         # if path does't end with html extension,
         # serve it in a normal way
-        if not self.path.endswith(HTML_EXT):
+        if not (serve_index_mako or self.path.endswith('.htm')):
             return SimpleHTTPRequestHandler.do_GET(self)
 
         # if path ends with htm extension
         # find appropriate .mako file and render it
+        if serve_index_mako:
+            # it is a directory with index.mako file inside
+            sep = '' if self.path.endswith('/') else '/'
+            fname = self.path + sep + 'index.mako'
+        else:
+            # replace .htm extension for .mako
+            fname = self.path[:-4] + '.mako'
 
-        # replace .htm extension for .mako
-        fname = self.path[:-len(HTML_EXT)] + '.mako'
         self.log_message("rendering %s template", fname)
 
         try:
 
             template = lookup.get_template(fname)
-            html = template.render()
+
+            # CURRENT_URI is passed to the template
+            # more parameters can be added if necessary
+            html = template.render(CURRENT_URI=self.path)
 
         except exceptions.TopLevelLookupException:
             self.send_error(
@@ -116,6 +123,25 @@ class MakoHandler(SimpleHTTPRequestHandler):
         self.send_header('Content-Length', len(html))
         self.end_headers()
         self.wfile.write(html)
+
+    def serve_index_mako(self):
+        """If index.mako is present in a directory,
+        serve it instead of a directory listing"""
+
+        path = self.translate_path(self.path)
+
+        # not a directory
+        if not os.path.isdir(path):
+            return False
+
+        # if index.html exists in directory,
+        # show it rather than index.mako
+        index_path = os.path.join(path, 'index.html')
+        if os.path.exists(index_path):
+            return False
+
+        index_path = os.path.join(path, 'index.mako')
+        return os.path.exists(index_path)
 
 
 if __name__ == '__main__':
