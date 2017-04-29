@@ -112,12 +112,6 @@ class MakoHandler(SimpleHTTPRequestHandler):
             # show detailed rendering error description
             html = exceptions.html_error_template().render()
 
-        if not html: return # nothing to show here
-
-        # if it is unicode, convert it to utf-8
-        # if isinstance(html, str):
-        #     html = html.encode('utf-8')
-
         self.send_response(HTTP_STATUS_OK)
         self.send_header('Content-type', 'text/html')
         self.send_header('Content-Length', len(html))
@@ -135,7 +129,7 @@ class MakoHandler(SimpleHTTPRequestHandler):
             return False
 
         # if index.html exists in directory,
-        # show it rather than index.mako
+        # just show it rather than processing index.mako
         index_path = os.path.join(path, 'index.html')
         if os.path.exists(index_path):
             return False
