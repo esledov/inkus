@@ -115,8 +115,8 @@ class MakoHandler(SimpleHTTPRequestHandler):
         if not html: return # nothing to show here
 
         # if it is unicode, convert it to utf-8
-        if isinstance(html, str):
-            html = html.encode('utf-8')
+        # if isinstance(html, str):
+        #     html = html.encode('utf-8')
 
         self.send_response(HTTP_STATUS_OK)
         self.send_header('Content-type', 'text/html')
