@@ -14,7 +14,7 @@ Then you can run [Mako templates](http://www.makotemplates.org) (and python) mag
  * define blocks of content that should be easily modified, 
  * make a layout template and inherit your page templates from it, 
  * create python functions directly in the template, 
- * fetch those real estate property descriptions and features from an excel file, 
+ * fetch and show data stored somewhere else (for example, in MS Excel or json files), 
  * programmatically rearrange html snippets, etc etc.
 
 Inkus encourages a gradual coversion and does not force you to create new content types unless 
